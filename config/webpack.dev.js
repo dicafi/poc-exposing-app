@@ -10,10 +10,10 @@ module.exports = merge(common, {
 
   // Control how source maps are generated
   devtool: 'inline-source-map',
-    
+
   // Enable: It is possible testing in IE 11, but reload / replacement will break due to a bug in webpack 5 !
   // Disable: It is possible to use hot relad / replacement but not using IE 11 !
-  // target: ['web', 'es5'], 
+  // target: ['web', 'es5'],
 
   // Spin up a server for quick development
   devServer: {
@@ -22,7 +22,13 @@ module.exports = merge(common, {
     open: true,
     compress: true,
     hot: true,
-    port: 8080,
+    port: 8085,
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers":
+        "X-Requested-With, content-type, Authorization",
+    },
   },
 
   plugins: [

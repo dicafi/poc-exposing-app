@@ -1,5 +1,6 @@
 const pathtoresolve = require('path');
 const paths = require('./paths')
+const deps = require("./../package.json");
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
@@ -7,10 +8,13 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
+const webpack = require('webpack')
+const { ModuleFederationPlugin } = require('webpack').container
+
 module.exports = {
   // Where webpack looks to start building the bundle
   entry: [ 'whatwg-fetch', paths.src + '/main.js'],
-  
+
   resolve: {
         extensions: [ '.js', '.vue' ],
 		 alias: {
@@ -26,14 +30,14 @@ module.exports = {
     filename: '[name].bundle.js',
     publicPath: '/',
   },
-  
-  
+
+
   // Customize the webpack build process
   plugins: [
-  
+
      // Vue plugin for the magic
-    new VueLoaderPlugin(), 
-	
+    new VueLoaderPlugin(),
+
     // Removes/cleans build folders and unused assets when rebuilding
     new CleanWebpackPlugin(),
 
@@ -49,14 +53,31 @@ module.exports = {
         },
       ],
     }),
-
+    new ModuleFederationPlugin({
+      name: "exposing",
+      remotes: {},
+      filename: "remoteEntryExposer.js",
+      shared: {
+        "./src/components/ExposedComponent.vue": {
+          eager: true,
+          singleton: true,
+          requiredVersion: deps.vue
+        },
+      },
+      exposes: {
+        "./Exposed": "./src/components/ExposedComponent.vue",
+      }
+    }),
     // Generates an HTML file from a template
     // Generates deprecation warning: https://github.com/jantimon/html-webpack-plugin/issues/1501
     new HtmlWebpackPlugin({
       title: 'webpack Boilerplate',
-      favicon: paths.src + '/images/favicon.png',
+      // favicon: paths.src + '/images/favicon.png',
       template: paths.src + '/template.html', // template file
       filename: 'index.html', // output file
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
     }),
   ],
 
